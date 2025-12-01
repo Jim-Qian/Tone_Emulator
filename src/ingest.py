@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "writings"
 

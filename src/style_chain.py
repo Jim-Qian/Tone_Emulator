@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv()
 
@@ -13,7 +13,7 @@ def build_style_chain(style_corpus: str):
 
     llm = ChatOpenAI(
         model="gpt-4o-mini",  # or another chat model you have access to
-        temperature=0.9,      # higher temp for more style
+        temperature=0.9,
     )
 
     system_prompt = """
@@ -44,6 +44,7 @@ Topic / instructions:
 Length: about {length} paragraph(s).
 """.strip()
 
+    # Build prompt with variables style_corpus, user_prompt, length
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", system_prompt),
@@ -51,9 +52,10 @@ Length: about {length} paragraph(s).
         ]
     )
 
-    chain = prompt | llm | StrOutputParser()
+    # ✅ Bake in the style_corpus here
+    prompt = prompt.partial(style_corpus=style_corpus)
 
-    # Partial the style corpus so it's baked into the chain
-    chain = chain.partial(style_corpus=style_corpus)
+    # Then build the chain
+    chain = prompt | llm | StrOutputParser()
 
     return chain
