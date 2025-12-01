@@ -1,6 +1,6 @@
 import sys
-from ingest import load_user_corpus
-from style_chain import build_style_chain
+from .ingest import load_user_corpus
+from .style_chain import build_style_chain
 
 def main():
     print("=== Personal Style Writer (LangChain CLI) ===")
