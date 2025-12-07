@@ -144,7 +144,7 @@
     <script>
       function toneEmulatorApp() {
         return {
-          apiUrl: "http://127.0.0.1:8000/generate",
+          apiUrl: "http://localhost:8000/generate",
           prompt: "",
           length: 1,
           style: "concise", // "concise" or "elaborate"
@@ -158,11 +158,14 @@
             if (!trimmed || this.loading) return;
 
             // Show user prompt in history
-            this.messages.push({ role: "user", content: trimmed });
+            // this.messages.push({ role: "user", content: trimmed });
 
             this.loading = true;
 
             try {
+              // Needed for conversation with LLM to be stateful. Only send the last few messages to avoid huge payloads.
+              // const historyForApi = this.messages.slice(-6);
+
               const res = await fetch(this.apiUrl, {
                 method: "POST",
                 headers: {
@@ -172,6 +175,7 @@
                   prompt: trimmed,
                   length: this.length || 1,
                   style: this.style,
+                  // history: historyForApi,
                 }),
               });
 
@@ -185,9 +189,7 @@
 
               this.$nextTick(() => {
                 const el = this.$refs.history;
-                if (el) {
-                  el.scrollTop = el.scrollHeight;
-                }
+                if (el) el.scrollTop = el.scrollHeight;
               });
             } catch (err) {
               console.error(err);
@@ -205,3 +207,4 @@
     </script>
   </body>
 </html>
+
