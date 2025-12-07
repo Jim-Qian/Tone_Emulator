@@ -1,6 +1,9 @@
 **Tone Emulator**
 
 This project will ingest the user's previous writing documents and then can be prompted to write new paragraphs in that user's voice.
+Currently the conversation is stateless (with each user input in the frontend). To make it not stateless, either 1) pass entire previous history as text with each user input or 2) store session ID in the backend (Redis/DB etc).
+
+This project uses LangChain, Tailwind CSS, and Alpine JS.
 
 ------
 **Code Structure:**
