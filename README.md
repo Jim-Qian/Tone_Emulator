@@ -1,4 +1,5 @@
 **Tone Emulator**
+
 This project will ingest the user's previous writing documents and then can be prompted to write new paragraphs in that user's voice.
 
 ------
@@ -25,9 +26,10 @@ Tone_Emulator/
 
 ------
 **How to Run Locally:**
+
 This project has 2 independent frontends: command line or web browser.
 
-**For Both:**
+**Prerequisite for Both:**
 1. python3 -m venv env
 2. source env/bin/activate
 3. pip3 install -r requirements.txt
