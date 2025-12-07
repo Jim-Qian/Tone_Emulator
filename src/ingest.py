@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
@@ -21,7 +20,7 @@ def load_user_corpus(max_chars: int = 8000) -> str:
                 texts.append(f.read())
         elif file.suffix.lower() == ".pdf":
             print(f"Ingesting PDF file: {file.name}")
-            loader = PyPDFLoader(str(file))
+            loader = PyPDFLoader(str(file))  # Extract pdf file's text locally.
             docs = loader.load()
             # Each doc is a page; join their text
             page_texts = [d.page_content for d in docs if d.page_content]
@@ -31,7 +30,7 @@ def load_user_corpus(max_chars: int = 8000) -> str:
     if not full_text:
         raise ValueError("No text found in writings directory")
 
-    # Optional: use a splitter to pick representative chunks
+    # Use a splitter (locally) to split the text into chunks so LLM can process easier.
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200,

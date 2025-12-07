@@ -2,29 +2,39 @@
 This project will ingest the user's previous writing documents and then can be prompted to write new paragraphs in that user's voice.
 
 ------
+**Code Structure:**
 
+```
 Tone_Emulator/
   ├─ data/
-  │   └─ writings/        # your input docs go here
+  │   └─ writings/        # Your input files
+  ├─ env/
+  ├─ frontend/
+  │   └─ index.html/      
   ├─ src/
-  │   ├─ __init__.py      # 
-  │   ├─ ingest.py        # load & preprocess documents
-  │   ├─ style_chain.py   # LangChain chain definition
-  │   └─ cli.py           # command line interface
+  │   ├─ __init__.py      
+  |   ├─ cli.py           # Command line interface
+  │   ├─ ingest.py        # Load & preprocess documents locally (without contacting LLM APIs)
+  │   ├─ server.py        # Backend website APIs
+  │   └─ style_chain.py   # LangChain chain definition (contacts LLM APIs)
   ├─ .env                 # API keys
   ├─ .gitignore
-  ├─ requirements.txt
-  └─ README.md
+  ├─ README.md
+  └─ requirements.txt
+```
 
 ------
+**How to Run Locally:**
+This project has 2 independent frontends: command line or web browser.
 
-**How to run locally**
-python3 -m venv env
-source env/bin/activate
-pip3 install -r requirements.txt
+**For Both:**
+1. python3 -m venv env
+2. source env/bin/activate
+3. pip3 install -r requirements.txt
 
-**Start the backend:**
-python3 -m src.cli
+**Command Line:**
+1. python3 -m src.cli
 
-**Start the frontend (at localhost:8000):**
-uvicorn src.server:app --reload
+**Web Browser:**
+1. uvicorn src.server:app --reload
+2. Open the index.html
