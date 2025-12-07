@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tone Emulator</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js CDN -->
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 min-h-screen">
+    <div
+      class="min-h-screen flex items-center justify-center"
+      x-data="toneEmulatorApp()"
+    >
+      <div class="w-full max-w-2xl px-4 py-8">
+        <!-- Header -->
+        <header class="mb-6">
+          <h1 class="text-2xl font-semibold tracking-tight">
+            Tone Emulator
+          </h1>
+          <p class="text-sm text-slate-500 mt-1">
+            Generate new text that follows your writing style.
+          </p>
+        </header>
+
+        <!-- Output / history -->
+        <section
+          class="border border-slate-200 rounded-xl bg-white h-64 mb-4 overflow-y-auto text-sm"
+          x-ref="history"
+        >
+          <div class="p-4 space-y-3" x-show="messages.length === 0">
+            <p class="text-slate-400">
+              No output yet. Enter a prompt below and click <span class="font-medium">Generate</span>.
+            </p>
+          </div>
+
+          <div class="p-4 space-y-4" x-show="messages.length > 0">
+            <template x-for="(msg, idx) in messages" :key="idx">
+              <div class="space-y-1">
+                <div class="text-xs uppercase text-slate-400 tracking-wide">
+                  <span x-text="msg.role === 'user' ? 'Prompt' : 'Response'"></span>
+                </div>
+                <div
+                  class="rounded-lg px-3 py-2"
+                  :class="msg.role === 'user'
+                    ? 'bg-slate-50 border border-slate-200'
+                    : 'bg-slate-900 text-slate-50'"
+                >
+                  <pre
+                    class="whitespace-pre-wrap font-sans"
+                    x-text="msg.content"
+                  ></pre>
+                </div>
+              </div>
+            </template>
+          </div>
+        </section>
+
+        <!-- Input form -->
+        <form class="space-y-3" @submit.prevent="send()">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">
+              Prompt
+            </label>
+            <textarea
+              x-model="prompt"
+              rows="4"
+              class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 resize-y"
+              placeholder="Describe what you want the model to write in your tone..."
+            ></textarea>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-4 text-xs">
+            <label class="flex items-center gap-2">
+              <span class="text-slate-600">Paragraphs</span>
+              <input
+                type="number"
+                min="1"
+                max="5"
+                x-model.number="length"
+                class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 text-xs"
+              />
+            </label>
+
+            <label class="inline-flex items-center gap-2">
+              <input
+                type="checkbox"
+                x-model="memeMode"
+                class="rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+              />
+              <span class="text-slate-600">Meme mode</span>
+            </label>
+
+            <label class="inline-flex items-center gap-2">
+              <input
+                type="checkbox"
+                x-model="emojiMode"
+                class="rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+              />
+              <span class="text-slate-600">Emoji spam</span>
+            </label>
+          </div>
+
+          <div class="flex items-center gap-3 pt-1">
+            <button
+              type="submit"
+              class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-slate-900 text-slate-50 text-sm font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              :disabled="loading || !prompt.trim()"
+            >
+              <span x-show="!loading">Generate</span>
+              <span x-show="loading">Generating…</span>
+            </button>
+
+            <button
+              type="button"
+              class="text-xs text-slate-400 hover:text-slate-600"
+              @click="clearMessages()"
+            >
+              Clear
+            </button>
+
+            <p
+              class="text-xs text-rose-500"
+              x-show="error"
+              x-text="error"
+            ></p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      function toneEmulatorApp() {
+        return {
+          apiUrl: "http://127.0.0.1:8000/generate",
+          prompt: "",
+          length: 1,
+          memeMode: false,
+          emojiMode: false,
+          messages: [],
+          loading: false,
+          error: "",
+
+          async send() {
+            this.error = "";
+            const trimmed = this.prompt.trim();
+            if (!trimmed || this.loading) return;
+
+            // Show user prompt in history
+            this.messages.push({ role: "user", content: trimmed });
+
+            this.loading = true;
+
+            try {
+              const res = await fetch(this.apiUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  prompt: trimmed,
+                  length: this.length || 1,
+                  meme_mode: this.memeMode,
+                  emoji_mode: this.emojiMode,
+                }),
+              });
+
+              if (!res.ok) {
+                throw new Error("API error: " + res.status);
+              }
+
+              const data = await res.json();
+              this.messages.push({ role: "assistant", content: data.text });
+              this.prompt = "";
+
+              this.$nextTick(() => {
+                const el = this.$refs.history;
+                if (el) {
+                  el.scrollTop = el.scrollHeight;
+                }
+              });
+            } catch (err) {
+              console.error(err);
+              this.error = "Failed to generate text.";
+            } finally {
+              this.loading = false;
+            }
+          },
+
+          clearMessages() {
+            this.messages = [];
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

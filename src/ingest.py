@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "writings"
 
@@ -18,6 +19,13 @@ def load_user_corpus(max_chars: int = 8000) -> str:
         if file.suffix.lower() in {".txt", ".md"} and file.is_file():
             with open(file, "r", encoding="utf-8") as f:
                 texts.append(f.read())
+        elif file.suffix.lower() == ".pdf":
+            print(f"Ingesting PDF file: {file.name}")
+            loader = PyPDFLoader(str(file))
+            docs = loader.load()
+            # Each doc is a page; join their text
+            page_texts = [d.page_content for d in docs if d.page_content]
+            texts.append("\n\n".join(page_texts))
 
     full_text = "\n\n".join(texts).strip()
     if not full_text:

@@ -1,5 +1,8 @@
 langchain
 langchain-openai
+langchain-text-splitters
+langchain-community
 python-dotenv
 tiktoken
-langchain-text-splitters
+fastapi
+uvicorn

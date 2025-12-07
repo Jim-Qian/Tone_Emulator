@@ -23,4 +23,8 @@ python3 -m venv env
 source env/bin/activate
 pip3 install -r requirements.txt
 
- python3 -m src.cli
+**Start the backend:**
+python3 -m src.cli
+
+**Start the frontend (at localhost:8000):**
+uvicorn src.server:app --reload
