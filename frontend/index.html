@@ -36,7 +36,8 @@
         >
           <div class="p-4 space-y-3" x-show="messages.length === 0">
             <p class="text-slate-400">
-              No output yet. Enter a prompt below and click <span class="font-medium">Generate</span>.
+              No output yet. Enter a prompt below and click
+              <span class="font-medium">Generate</span>.
             </p>
           </div>
 
@@ -88,23 +89,28 @@
               />
             </label>
 
-            <label class="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                x-model="memeMode"
-                class="rounded border-slate-300 text-slate-900 focus:ring-slate-900"
-              />
-              <span class="text-slate-600">Meme mode</span>
-            </label>
-
-            <label class="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                x-model="emojiMode"
-                class="rounded border-slate-300 text-slate-900 focus:ring-slate-900"
-              />
-              <span class="text-slate-600">Emoji spam</span>
-            </label>
+            <!-- Concise / Elaborate toggle -->
+            <div class="flex items-center gap-3">
+              <span class="text-slate-600">Style</span>
+              <label class="inline-flex items-center gap-1">
+                <input
+                  type="radio"
+                  value="concise"
+                  x-model="style"
+                  class="text-slate-900 border-slate-300 focus:ring-slate-900"
+                />
+                <span>Concise</span>
+              </label>
+              <label class="inline-flex items-center gap-1">
+                <input
+                  type="radio"
+                  value="elaborate"
+                  x-model="style"
+                  class="text-slate-900 border-slate-300 focus:ring-slate-900"
+                />
+                <span>Elaborate</span>
+              </label>
+            </div>
           </div>
 
           <div class="flex items-center gap-3 pt-1">
@@ -141,8 +147,7 @@
           apiUrl: "http://127.0.0.1:8000/generate",
           prompt: "",
           length: 1,
-          memeMode: false,
-          emojiMode: false,
+          style: "concise", // "concise" or "elaborate"
           messages: [],
           loading: false,
           error: "",
@@ -166,8 +171,7 @@
                 body: JSON.stringify({
                   prompt: trimmed,
                   length: this.length || 1,
-                  meme_mode: this.memeMode,
-                  emoji_mode: this.emojiMode,
+                  style: this.style,
                 }),
               });
 

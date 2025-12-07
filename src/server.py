@@ -9,10 +9,9 @@ from .style_chain import build_style_chain
 
 app = FastAPI()
 
-# Allow frontend to call API (localhost dev)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # you can tighten this later
+    allow_origins=["*"],  # for dev; you can restrict later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,18 +28,35 @@ print("Style chain ready.")
 class GenerateRequest(BaseModel):
     prompt: str
     length: int = 1
-    meme_mode: bool = False
-    emoji_mode: bool = False
+    style: str = "concise"  # "concise" | "elaborate"
 
 
 class GenerateResponse(BaseModel):
     text: str
 
+
 # ---------- Routes ----------
 
 @app.post("/generate", response_model=GenerateResponse)
 async def generate(req: GenerateRequest):
-    # Call your LangChain chain
-    result = chain.invoke({"user_prompt": req.prompt, "length": req.length})
+    # Adjust the prompt based on style
+    if req.style == "elaborate":
+        styled_prompt = (
+            req.prompt
+            + "\n\nWrite with more detail, nuance, and elaboration. Use richer explanations and slightly longer sentences."
+        )
+    else:
+        # default: concise
+        styled_prompt = (
+            req.prompt
+            + "\n\nWrite in a concise, to-the-point style with minimal fluff."
+        )
+
+    result = chain.invoke(
+        {
+            "user_prompt": styled_prompt,
+            "length": req.length,
+        }
+    )
 
     return GenerateResponse(text=result)
